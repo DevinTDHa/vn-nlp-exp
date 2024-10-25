@@ -24,36 +24,38 @@ if __name__ == "__main__":
     # Plot the frequencies
     plt.figure(figsize=(10, 5))
     plt.bar(
-        df.index + 1, df["frequency"].apply(lambda x: np.log(x + 1)), width=1
+        df.index + 1, df["frequency"].apply(lambda x: np.log10(x + 1)), width=1
     )  # Apply logarithmic scale to the frequency
     plt.xlabel("Word Index (most frequent to least frequent)")
-    plt.ylabel("Log(Frequency)")
-    plt.title("Word Frequencies (Log Scale)")
+    plt.ylabel("Log10(Frequency)")
+    plt.title("Word Frequencies (Log10 Scale)")
 
     # Calculate the cumulative sum and find the 80% coverage point
     cumulative_sum = df["frequency"].cumsum()
     total_sum = df["frequency"].sum()
 
-    # https://forum.language-learners.org/viewtopic.php?t=16463
-    eighty_percent_index = (cumulative_sum <= 0.8 * total_sum).sum()
-    ninety_five_percent_index = (cumulative_sum <= 0.95 * total_sum).sum()
-    print(f"80% coverage at index {eighty_percent_index}")
-    print(f"95% coverage at index {ninety_five_percent_index}")
+    # Calculate the cumulative sum and find the coverage points
+    coverage_points = [80, 90, 95, 98, 99, 99.5]
+    coverage_indices = {}
+    for point in coverage_points:
+        coverage_indices[point] = (cumulative_sum <= (point / 100) * total_sum).sum()
+        print(f"{point}% coverage at index {coverage_indices[point]}")
 
-    # Draw a vertical line at the 80% coverage point
-    plt.axvline(
-        x=eighty_percent_index,
-        color="r",
-        linestyle="--",
-        label=f"80% coverage at index {eighty_percent_index}",
-    )
-    plt.axvline(
-        x=ninety_five_percent_index,
-        color="orange",
-        linestyle="--",
-        label=f"95% coverage at index {ninety_five_percent_index}",
-    )
+    # Choose colors from the viridis colormap
+    cmap = plt.get_cmap("viridis")
+    colors = [cmap(i / len(coverage_points)) for i in range(len(coverage_points))]
+
+    # Draw vertical lines at the coverage points
+    for i, point in enumerate(coverage_points):
+        plt.axvline(
+            x=coverage_indices[point],
+            color=colors[i],
+            linestyle="--",
+            label=f"{point}% coverage at index {coverage_indices[point]}",
+        )
+
     plt.legend()
 
-    print("Saving plot to 'word_frequencies.png'")
+    print("Saving plot to 'word_frequencies.*'")
     plt.savefig("word_frequencies.png", dpi=300)
+    plt.savefig("word_frequencies.svg")
