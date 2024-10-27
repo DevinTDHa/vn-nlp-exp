@@ -6,6 +6,7 @@ import scala.collection.parallel.CollectionConverters.ArrayIsParallelizable
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.jdk.CollectionConverters._
 import scala.util.Using
+import java.nio.file.Paths
 
 object ProcessFolder {
 
@@ -20,14 +21,18 @@ object ProcessFolder {
     }
 
     def processFile(fileName: String): Unit = {
+      val absolutePath = Paths.get(inputFolder, fileName).toAbsolutePath.toString
       println(s"Processing: $fileName")
-      Using.resource(scala.io.Source.fromFile(inputFolder + fileName)) { file =>
+      Using.resource(scala.io.Source.fromFile(absolutePath)) { file =>
         val text: Iterator[String] = file.getLines()
         val segmented: Iterator[String] = text.map(processText(_).mkString(" "))
 
         // Write the segmented text to a file
-        Using.resource(new java.io.PrintWriter(outputFolder + fileName)) { writer =>
-          segmented.foreach(writer.println)
+        val outputFile = outputFolder + fileName.replace(" ", "_")
+        Using.resource(new java.io.PrintWriter(outputFile)) {
+          writer =>
+            println(s"Writing to $outputFile")
+            segmented.foreach(writer.println)
         }
 
       }
@@ -36,8 +41,10 @@ object ProcessFolder {
 
   def main(args: Array[String]): Unit = {
     val inputFolder = args(0)
-    val outputFolder = args(1)
+    val outputFolder = if (args(1).endsWith("/")) args(1) else args(1) + "/"
     val numWorkers = args(2).toInt
+
+    println("Running with args " + args.mkString(" "))
 
     // Create output Folder if it doesnt exist
     new File(outputFolder).mkdirs()
