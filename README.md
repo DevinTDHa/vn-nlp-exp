@@ -6,7 +6,7 @@ explained in more detail on my [blog](https://devintdha.github.io/projects/).
 Currently it contains the following experiments:
 
 1. Some dirty and unordered Jupyter notebooks to process the Open Subtitles Actually
-   Open Edition and other nonsense in the [notebooks[(/notebooks) folder
+   Open Edition and other nonsense in the [notebooks](/notebooks) folder
 2. Word Segmentation using VnCoreNLP on multiple cores the [word_segmentation](/word_segmentation)
    folder
 
